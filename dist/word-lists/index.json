@@ -1,0 +1,13 @@
+{
+  "wordLists": [
+    {
+      "file": "eff_large_wordlist.txt"
+    },
+    {
+      "file": "eff_short_wordlist.txt"
+    },
+    {
+      "file": "eff_short_wordlist_unique.txt"
+    }
+  ]
+}

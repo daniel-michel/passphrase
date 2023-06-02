@@ -1,0 +1,16 @@
+{
+    "compilerOptions": {
+        "target": "ESNext",
+        "module": "ESNext",
+        "moduleResolution": "node",
+        "strict": true,
+        "noImplicitAny": true,
+        "noImplicitThis": true,
+        "outDir": "./dist/js",
+        "sourceMap": true,
+        "useDefineForClassFields": false
+    },
+    "include": [
+        "./src/**/*"
+    ],
+}

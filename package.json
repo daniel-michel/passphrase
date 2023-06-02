@@ -1,4 +1,9 @@
 {
+  "scripts": {
+    "build": "tsc",
+    "watch": "tsc --watch",
+    "clean": "cd dist && git clean -dfX"
+  },
   "devDependencies": {
     "typescript": "^5.0.4"
   },
