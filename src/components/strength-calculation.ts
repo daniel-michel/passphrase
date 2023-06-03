@@ -25,7 +25,6 @@ export class StrengthCalculation extends LitElement {
   }
 
   render() {
-    console.log("strength calculation render", this.options);
     const { options, count, formattedCount, exponential, bitsOfEntropy } =
       (() => {
         if (!this.options) {
@@ -44,22 +43,22 @@ export class StrengthCalculation extends LitElement {
           ? this.options.count
           : this.options.length;
 
-        const passwordCount = BigInt(options) ** BigInt(count);
+        const passphraseCount = BigInt(options) ** BigInt(count);
         return {
           options,
           count,
-          formattedCount: passwordCount
+          formattedCount: passphraseCount
             .toString()
             .match(/.{1,3}(?=(.{3})*$)/g)
             ?.join(","),
-          exponential: Number(passwordCount).toExponential(3).split(/e\+?/),
+          exponential: Number(passphraseCount).toExponential(3).split(/e\+?/),
           bitsOfEntropy: entropyForOptions(this.options).toFixed(1),
         };
       })();
 
     return html`
       <info-note>
-        The number of unique passwords with the current settings are:<br />
+        The number of unique passphrases with the current settings are:<br />
         ${options}<sup>${count}</sup> = <span class="total-number">${formattedCount}</span> ≈ ${exponential[0]}
         &sdot; 10<sup>${exponential[1]}</sup><br />
         This approximates to <b>${bitsOfEntropy} bits of entropy</b>.

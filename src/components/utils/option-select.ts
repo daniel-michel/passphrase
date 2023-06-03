@@ -45,6 +45,9 @@ export class OptionSelect<T> extends LitElement {
       clip-path: inset(0 0 0 0 round var(--border-radius));
     }
     .item {
+      border: none;
+      text-align: left;
+      font-size: 0.9rem;
       text-wrap: balance;
       display: grid;
       align-items: center;
@@ -135,12 +138,12 @@ export class OptionSelect<T> extends LitElement {
     >
       ${this.options.map(
         (option, i) =>
-          html`<div
+          html`<button
             class="item"
             @click="${(event: Event) => this.itemClicked(event, i)}"
           >
             ${this.renderItem(option)}
-          </div>`
+          </button>`
       )}
     </div>`;
   }

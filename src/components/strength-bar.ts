@@ -13,10 +13,9 @@ export class StrengthBar extends LitElement {
         yellow 70%,
         hsl(120, 80%, 60%)
       );*/
-      background-color: hsl(0, 0%, 13%);
+      background-color: hsl(0, 0%, 23%);
       border-radius: 0.3em;
       height: 0.5em;
-      margin: 0.5em 0;
     }
     .fill {
       --percent: min(calc(var(--strength) * 1%), 100%);

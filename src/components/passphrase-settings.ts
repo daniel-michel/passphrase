@@ -14,6 +14,14 @@ export class PassphraseSettings extends LitElement {
       align-content: center;
       min-height: 100%;
     }
+
+    input {
+      background-color: hsl(0, 0%, 13%);
+      font-size: 0.9rem;
+      padding: 0.5em 0.7em;
+      border: none;
+      border-radius: .3em;
+    }
   `;
 
   static get properties() {

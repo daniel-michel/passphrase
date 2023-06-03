@@ -1,4 +1,4 @@
-import { html, css, LitElement, unsafeCSS } from "lit";
+import { html, css, LitElement, unsafeCSS, PropertyValueMap } from "lit";
 import { createDataUrl } from "../utils/url.js";
 import {
   GenerationOptions,
@@ -6,8 +6,7 @@ import {
   entropyForOptions,
   generatePassphrase,
 } from "../passphrase-generator.js";
-import "./utils/tooltip-toast.js";
-import "./strength-bar.js";
+import "./passphrase-display.js";
 
 const copyIconSvg = `<svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 0 24 24" width="24px" fill="#FFFFFF"><path d="M0 0h24v24H0z" fill="none"/><path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z"/></svg>`;
 const copyIconUrl = createDataUrl(copyIconSvg, "image/svg+xml");
@@ -34,70 +33,6 @@ export class PassphraseGenerator extends LitElement {
     #generate:disabled {
       background-color: rgb(65, 80, 129);
     }
-
-    #password-container {
-      display: grid;
-      grid-auto-flow: column;
-      gap: 1em;
-      grid-template-columns: 1fr auto;
-    }
-
-    #password::before {
-      content: "Hover to show password";
-      background-color: hsl(0, 0%, 31%);
-      /* backdrop-filter: blur(5px); */
-      position: absolute;
-      width: 100%;
-      height: 100%;
-      top: 0;
-      left: 0;
-      display: grid;
-      justify-content: center;
-      align-content: center;
-      border-radius: 0.3em;
-      opacity: 1;
-      pointer-events: none;
-      transition: opacity 0.1s 0s;
-    }
-    #password:empty::before {
-      content: "";
-    }
-    #password:hover::before {
-      opacity: 0;
-      transition: opacity 0.2s 0.2s;
-    }
-    #password {
-      position: relative;
-      background-color: hsl(0, 0%, 13%);
-      padding: 1em 1.2em;
-      min-height: 1.2em;
-      border-radius: 0.3em;
-      text-align: center;
-      display: grid;
-      justify-content: center;
-      align-content: center;
-    }
-    tooltip-toast {
-      display: grid;
-      aspect-ratio: 1;
-      height: 100%;
-      min-height: 0;
-      writing-mode: vertical-lr;
-    }
-    #copy {
-      padding: 0;
-      aspect-ratio: 1;
-      background-color: hsl(0, 0%, 13%);
-      border-radius: 0.3em;
-      background-image: url("${unsafeCSS(copyIconUrl)}");
-      background-position: center;
-      background-repeat: no-repeat;
-      background-size: 50%;
-      min-height: 0;
-    }
-    #copy-slot {
-      writing-mode: horizontal-tb;
-    }
   `;
 
   static get properties() {
@@ -108,13 +43,25 @@ export class PassphraseGenerator extends LitElement {
 
   settings?: PassphraseGenerationOptions;
 
-  password?: string;
-  optionsUsedForCurrentPassword?: GenerationOptions;
+  passphrase?: string;
+  optionsUsedForCurrentPassphrase?: GenerationOptions;
 
   showCopyIndicator = false;
 
   constructor() {
     super();
+  }
+
+  protected update(
+    changedProperties: PropertyValueMap<any> | Map<PropertyKey, unknown>
+  ): void {
+    if (
+      changedProperties.get("settings")?.words.length !== 0 &&
+      !this.passphrase
+    ) {
+      this.generate();
+    }
+    super.update(changedProperties);
   }
 
   render() {
@@ -127,46 +74,30 @@ export class PassphraseGenerator extends LitElement {
         Generate
       </button>
 
-      <div id="password-container">
-        <div id="password">${this.password}</div>
-        <tooltip-toast .show=${this.showCopyIndicator}>
-          <button id="copy" @click=${this.copyToClipboard}></button>
-          <div slot="indicator" id="copy-slot">Copied</div>
-        </tooltip-toast>
-      </div>
+      <passphrase-display
+        .passphrase=${this.passphrase}
+        .options=${this.optionsUsedForCurrentPassphrase}
+      ></passphrase-display>
 
-      <strength-bar
-        .options=${this.optionsUsedForCurrentPassword}
-      ></strength-bar>
-
-      ${this.optionsUsedForCurrentPassword
-        ? html` <center>
-            The current passphrase has about
-            ${entropyForOptions(this.optionsUsedForCurrentPassword).toFixed(1)} bits of
-            entropy.
-          </center>`
-        : ""}
+      <center>
+        ${this.optionsUsedForCurrentPassphrase
+          ? html`
+              This passphrase has about
+              ${entropyForOptions(this.optionsUsedForCurrentPassphrase).toFixed(
+                1
+              )}
+              bits of entropy.
+            `
+          : ""}
+      </center>
     `;
   }
 
   generate() {
-    console.log("generate", this.settings);
     if (!this.settings) return;
-    this.password = generatePassphrase(this.settings);
-    this.optionsUsedForCurrentPassword = structuredClone(this.settings);
-    console.log("generated", this.password);
+    this.passphrase = generatePassphrase(this.settings);
+    this.optionsUsedForCurrentPassphrase = structuredClone(this.settings);
     this.requestUpdate();
-  }
-
-  copyToClipboard() {
-    if (!this.password) return;
-    navigator.clipboard.writeText(this.password);
-    this.showCopyIndicator = true;
-    this.requestUpdate();
-    setTimeout(() => {
-      this.showCopyIndicator = false;
-      this.requestUpdate();
-    }, 2000);
   }
 }
 

@@ -33,16 +33,13 @@ export class PassphraseGenerationPanel extends LitElement {
       <passphrase-settings
         .settings=${this.initialSettings}
         @loading=${(e: CustomEvent) => this.updateSettings(undefined)}
-        @settings=${(e: CustomEvent) => (
-          console.log(e), this.updateSettings(e.detail.settings)
-        )}
+        @settings=${(e: CustomEvent) => this.updateSettings(e.detail.settings)}
       ></passphrase-settings>
       <strength-calculation .options=${this.settings}></strength-calculation>
       <passphrase-generator .settings=${this.settings}></passphrase-generator>`;
   }
 
   updateSettings(settings?: PassphraseGenerationOptions) {
-    console.log(settings);
     this.settings = structuredClone(settings);
     this.requestUpdate();
   }
