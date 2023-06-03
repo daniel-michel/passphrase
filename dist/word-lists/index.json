@@ -1,13 +1,24 @@
 {
   "wordLists": [
     {
-      "file": "eff_large_wordlist.txt"
+      "file": "eff_large_wordlist.txt",
+      "language": "english",
+      "name": "EFF's long word list of 7776 words"
     },
     {
-      "file": "eff_short_wordlist.txt"
+      "file": "eff_short_wordlist.txt",
+      "language": "english",
+      "name": "EFF's short word list of 1296 words"
     },
     {
-      "file": "eff_short_wordlist_unique.txt"
+      "file": "eff_short_wordlist_unique.txt",
+      "language": "english",
+      "name": "EFF's short word list of 1296 words (with words that have unique three character prefixes)"
+    },
+    {
+      "file": "diceware.txt",
+      "language": "english",
+      "name": "Arnold Reinhold's Diceware word list"
     }
   ]
 }

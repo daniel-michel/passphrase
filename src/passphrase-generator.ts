@@ -5,7 +5,7 @@ export function generatePassphrase({
   capitalize,
 }: PassphraseGenerationOptions) {
   return getCryptographicRandomNumberSequence(words.length, count)
-    .map((number) => words[number])
+    .map((index) => words[index])
     .map((word) => (capitalize ? word[0].toUpperCase() + word.slice(1) : word))
     .join(separator);
 }
@@ -21,9 +21,11 @@ export function generatePassword({
 
 export function entropyForOptions(options: GenerationOptions) {
   if (isPassphraseOptions(options)) {
-    return Math.log2(options.words.length ** options.count);
+    if (options.words.length === 0) return 0;
+    return Math.log2(options.words.length) * options.count;
   } else {
-    return Math.log2(options.characters.length ** options.length);
+    if (options.characters.length === 0) return 0;
+    return Math.log2(options.characters.length) * options.length;
   }
 }
 
@@ -32,6 +34,7 @@ function getCryptographicRandomNumberSequence(limit: number, count: number) {
 }
 
 function getCryptographicRandomNumber(limit: number) {
+  // validate randomness
   const requiredBits = Math.ceil(Math.log2(limit));
   const requiredBytes = Math.ceil(requiredBits / 8);
   const array = new Uint8Array(requiredBytes);
@@ -39,7 +42,7 @@ function getCryptographicRandomNumber(limit: number) {
     crypto.getRandomValues(array);
     const randomValue =
       array.reduce(
-        (accumulator, currentValue) => accumulator << (8 + currentValue)
+        (accumulator, currentValue) => (accumulator << 8) + currentValue
       ) &
       ((1 << requiredBits) - 1);
     if (randomValue < limit) {
@@ -48,7 +51,7 @@ function getCryptographicRandomNumber(limit: number) {
   }
 }
 
-function isPassphraseOptions(
+export function isPassphraseOptions(
   options: GenerationOptions
 ): options is PassphraseGenerationOptions {
   return "words" in options;

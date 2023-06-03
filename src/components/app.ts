@@ -7,7 +7,6 @@ export class AppRoot extends LitElement {
     div {
       display: grid;
       gap: 1em;
-      grid-template-columns: auto auto;
       justify-content: center;
       align-content: center;
       min-height: 100%;

@@ -1,9 +1,8 @@
 import { html, css, LitElement } from "lit";
-import "./panel.js";
+import { PassphraseGenerationOptions } from "../passphrase-generator.js";
 import "./note.js";
 import "./utils/option-select.js";
 import "./utils/async-loaded.js";
-import { PassphraseGenerationOptions } from "../passphrase-generator.js";
 
 export class PassphraseSettings extends LitElement {
   static styles = css`
@@ -40,6 +39,9 @@ export class PassphraseSettings extends LitElement {
 
   constructor() {
     super();
+    this.availableWordLists.then((wordLists) => {
+      this.loadFile(wordLists[0].file);
+    });
   }
 
   render() {
@@ -51,23 +53,22 @@ export class PassphraseSettings extends LitElement {
           <option-select
             id="word-list"
             name="word-list"
-            @option-selected=${(e: CustomEvent) =>
-              this.loadFile(e.detail.selected.file)}
+            @option-selected=${(e: CustomEvent) => {
+              this.loadFile(e.detail.selected.file);
+            }}
             .options=${wordLists}
-            .renderItem=${({ file }: { file: string }) =>
-              html`<div>${file}</div>`}
+            .renderItem=${({ file, name }: { file: string; name: string }) =>
+              html`<div>${name}</div>`}
           ></option-select>
         `}
       ></async-loaded>
       <info-note>
-        The
+        More information about the word lists can be found in
         <a
           href="https://www.eff.org/deeplinks/2016/07/new-wordlists-random-passphrases"
           target="_blank"
-          >word lists</a
-        >
-        are from the
-        <abbr title="Electronic Frontier Foundation">EFF</abbr>.
+          >EFF's article</a
+        >.
       </info-note>
       <label for="word-count">Number of words:</label>
       <input
@@ -75,17 +76,13 @@ export class PassphraseSettings extends LitElement {
         id="word-count"
         name="word-count"
         min="1"
-        value="6"
+        value=${this.settings.count}
+        @input=${(e: InputEvent) => {
+          const target = e.target as HTMLInputElement;
+          this.settings.count = parseInt(target.value);
+          this.settingsUpdated();
+        }}
       />
-
-      <info-note>
-        <!-- With the current settings<br>
-				7776<sup>6</sup> = 221073919720733357899776 ≈ 2.211 ⋅ 10<sup>23</sup><br>
-				unique passwords can be created. -->
-        The number of unique passwords with the current settings are:<br />
-        -<sup>-</sup> = - ≈ -.--- ⋅ 10<sup>-</sup><br />
-        This approximates to <b>-</b> bits of entropy.
-      </info-note>
     `;
   }
 
@@ -106,6 +103,13 @@ export class PassphraseSettings extends LitElement {
     this.settings.words = words;
     this.dispatchSettings();
     this.#loading = false;
+  }
+
+  settingsUpdated() {
+    if (this.#loading) {
+      return;
+    }
+    this.dispatchSettings();
   }
 
   dispatchLoading() {

@@ -1,18 +1,14 @@
 import { html, css, LitElement } from "lit";
-import "./panel.js";
-import "./note.js";
-import "./utils/option-select.js";
-import "./utils/loading-spinner.js";
+import { PassphraseGenerationOptions } from "../passphrase-generator.js";
 import "./passphrase-settings.js";
 import "./passphrase-generator.js";
-import { PassphraseGenerationOptions } from "../passphrase-generator.js";
+import "./strength-calculation.js";
 
 export class PassphraseGenerationPanel extends LitElement {
   static styles = css`
     div {
       display: grid;
       gap: 1em;
-      grid-template-columns: auto auto;
       justify-content: center;
       align-content: center;
       min-height: 100%;
@@ -37,14 +33,17 @@ export class PassphraseGenerationPanel extends LitElement {
       <passphrase-settings
         .settings=${this.initialSettings}
         @loading=${(e: CustomEvent) => this.updateSettings(undefined)}
-        @settings=${(e: CustomEvent) => (console.log(e), this.updateSettings(e.detail.settings))}
+        @settings=${(e: CustomEvent) => (
+          console.log(e), this.updateSettings(e.detail.settings)
+        )}
       ></passphrase-settings>
+      <strength-calculation .options=${this.settings}></strength-calculation>
       <passphrase-generator .settings=${this.settings}></passphrase-generator>`;
   }
 
   updateSettings(settings?: PassphraseGenerationOptions) {
     console.log(settings);
-    this.settings = settings;
+    this.settings = structuredClone(settings);
     this.requestUpdate();
   }
 }

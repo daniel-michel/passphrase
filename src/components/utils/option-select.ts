@@ -1,4 +1,10 @@
-import { LitElement, html, css, TemplateResult, unsafeCSS } from "lit";
+import {
+  LitElement,
+  html,
+  css,
+  TemplateResult,
+  unsafeCSS,
+} from "lit";
 import { createDataUrl } from "../../utils/url.js";
 
 const iconSvg = `<svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 0 24 24" width="24px" fill="#FFFFFF"><path d="M0 0h24v24H0V0z" fill="none"/><path d="M12 5.83L15.17 9l1.41-1.41L12 3 7.41 7.59 8.83 9 12 5.83zm0 12.34L8.83 15l-1.41 1.41L12 21l4.59-4.59L15.17 15 12 18.17z"/></svg>`;
@@ -18,6 +24,7 @@ export class OptionSelect<T> extends LitElement {
     }
     .container {
       display: grid;
+      grid-auto-rows: 1fr;
       background-color: hsl(0, 0%, 13%);
       border: none;
       font-size: 1em;
@@ -25,9 +32,22 @@ export class OptionSelect<T> extends LitElement {
       color: white;
       border-radius: var(--border-radius);
       position: relative;
-      transition: clip-path 0.2s, top 0.2s;
+      --item-count: 1;
+      --selected-index: 0;
+      --top-offset: calc(var(--selected-index) / var(--item-count) * 100%);
+      --bottom-offset: calc((var(--item-count) - var(--selected-index) - 1) / var(--item-count) * 100%);
+      clip-path: inset(var(--top-offset) 0 var(--bottom-offset) 0 round var(--border-radius));
+      transform: translateY(calc(-1 * var(--top-offset) - 50% / var(--item-count)));
+      top: 50%;
+      transition: clip-path 0.2s, transform 0.2s;
+    }
+    .container.expanded {
+      clip-path: inset(0 0 0 0 round var(--border-radius));
     }
     .item {
+      text-wrap: balance;
+      display: grid;
+      align-items: center;
       background-color: transparent;
       padding: 0.5em 0.7em;
       padding-right: calc(0.7em + 1.5em);
@@ -72,26 +92,16 @@ export class OptionSelect<T> extends LitElement {
   }
 
   #expanded = false;
-  #clipPath = `inset(0 0 0 0 round var(--border-radius))`;
-  #topOffset = `0`;
 
   constructor() {
     super();
     this.addEventListener("click", this.expand);
     this.setAttribute("tabindex", "0");
-    setTimeout(() => {
-      this.updateSelectedCss();
-    }, 0);
   }
 
   expand() {
     this.#expanded = true;
     this.classList.add("expanded");
-    const center =
-      this.#selectedElement.offsetTop + this.#selectedElement.offsetHeight / 2;
-    const top = -center + this.offsetHeight / 2;
-    this.#clipPath = `inset(0 0 0 0 round var(--border-radius))`;
-    this.#topOffset = `${top}px`;
     this.requestUpdate();
   }
 
@@ -102,39 +112,26 @@ export class OptionSelect<T> extends LitElement {
 
     this.selectedIndex = index;
 
-    this.updateSelectedCss();
+    this.requestUpdate();
 
     this.classList.remove("expanded");
     this.dispatchEvent(
       new CustomEvent("option-selected", {
-        detail: { selected: this.options[index] },
+        detail: {
+          selected: this.options[index],
+          selectedIndex: index,
+        },
         bubbles: true,
         composed: true,
       })
     );
   }
 
-  updateSelectedCss() {
-    const center =
-      this.#selectedElement.offsetTop + this.#selectedElement.offsetHeight / 2;
-    const top = -center + this.offsetHeight / 2;
-    const cutTop = -top;
-    const cutBottom =
-      (this.shadowRoot!.querySelector(".container")! as HTMLElement)
-        .offsetHeight -
-      this.offsetHeight -
-      cutTop;
-
-    this.#clipPath = `inset(${cutTop}px 0 ${cutBottom}px 0 round var(--border-radius))`;
-    this.#topOffset = `${top}px`;
-    this.requestUpdate();
-  }
-
   render() {
     return html`<div
       tabindex="0"
       class="container ${this.#expanded ? "expanded" : ""}"
-      style="clip-path: ${this.#clipPath}; top: ${this.#topOffset}"
+      style="--item-count: ${this.options.length}; --selected-index: ${this.selectedIndex};"
     >
       ${this.options.map(
         (option, i) =>
