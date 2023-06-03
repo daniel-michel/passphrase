@@ -84,9 +84,14 @@ export class PassphraseSettings extends LitElement {
         id="word-count"
         name="word-count"
         min="1"
+        step="1"
         value=${this.settings.count}
         @input=${(e: InputEvent) => {
           const target = e.target as HTMLInputElement;
+          const count = parseInt(target.value);
+          if (!Number.isInteger(count)) {
+            return;
+          }
           this.settings.count = parseInt(target.value);
           this.settingsUpdated();
         }}

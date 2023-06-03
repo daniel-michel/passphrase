@@ -1,5 +1,6 @@
 {
   "scripts": {
+    "build-prod": "npm run build -- --sourceMap false --declaration false --removeComments true",
     "build": "tsc",
     "watch": "tsc --watch",
     "clean": "cd dist && git clean -dfX"

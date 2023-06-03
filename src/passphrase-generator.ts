@@ -34,7 +34,6 @@ function getCryptographicRandomNumberSequence(limit: number, count: number) {
 }
 
 function getCryptographicRandomNumber(limit: number) {
-  // validate randomness
   const requiredBits = Math.ceil(Math.log2(limit));
   const requiredBytes = Math.ceil(requiredBits / 8);
   const array = new Uint8Array(requiredBytes);

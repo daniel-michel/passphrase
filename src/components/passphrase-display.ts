@@ -1,8 +1,9 @@
-import { html, css, LitElement, unsafeCSS } from "lit";
+import { html, css, LitElement, unsafeCSS, PropertyValueMap } from "lit";
 import { createDataUrl } from "../utils/url.js";
 import {
   GenerationOptions,
   PassphraseGenerationOptions,
+  generateArray,
 } from "../passphrase-generator.js";
 import "./utils/tooltip-toast.js";
 import "./strength-bar.js";
@@ -15,6 +16,9 @@ const visibleIconUrl = createDataUrl(visibleIconSvg, "image/svg+xml");
 
 const hiddenIconSvg = `<svg xmlns="http://www.w3.org/2000/svg" height="48" viewBox="0 -960 960 960" width="48" fill="#FFFFFF"><path d="M816-64 648-229q-35 14-79 21.5t-89 7.5q-146 0-265-81.5T40-500q20-52 55.5-101.5T182-696L56-822l42-43 757 757-39 44ZM480-330q14 0 30-2.5t27-7.5L320-557q-5 12-7.5 27t-2.5 30q0 72 50 121t120 49Zm278 40L629-419q10-16 15.5-37.5T650-500q0-71-49.5-120.5T480-670q-22 0-43 5t-38 16L289-760q35-16 89.5-28T485-800q143 0 261.5 81.5T920-500q-26 64-67 117t-95 93ZM585-463 443-605q29-11 60-4.5t54 28.5q23 23 32 51.5t-4 66.5Z"/></svg>`;
 const hiddenIconUrl = createDataUrl(hiddenIconSvg, "image/svg+xml");
+
+const asteriskIconSvg = `<svg xmlns="http://www.w3.org/2000/svg" height="48" viewBox="0 -960 960 960" width="48" fill="#47eb47"><path d="M426-136v-250L210-261l-55-93 217-126-216-125 54-93 216 125v-251h108v251l216-125 54 93-216 125 217 126-55 93-216-125v250H426Z"/></svg>`;
+const asteriskIconUrl = createDataUrl(asteriskIconSvg, "image/svg+xml");
 
 export class PassphraseDisplay extends LitElement {
   static styles = css`
@@ -64,7 +68,88 @@ export class PassphraseDisplay extends LitElement {
     }
 
     .passphrase {
+      opacity: 0;
       padding: 0 0.8em;
+      grid-column: 1 / 1;
+      grid-row: 1 / 1;
+    }
+    .passphrase-generated .passphrase {
+      opacity: 1;
+      animation: fade-in 0.8s 1s ease-out backwards;
+    }
+    @keyframes fade-in {
+      0% {
+        color: transparent;
+      }
+      100% {
+        color: white;
+      }
+    }
+
+    .asterisk {
+      pointer-events: none;
+      grid-column: 1 / 1;
+      grid-row: 1 / 1;
+      display: grid;
+      z-index: 1;
+      height: 100%;
+      min-height: 0;
+      max-height: 100%;
+      grid-auto-flow: column;
+      align-items: center;
+      justify-content: center;
+    }
+    .asterisk-icon {
+      opacity: 0;
+      aspect-ratio: 1;
+      height: 1.7em;
+      background-image: url("${unsafeCSS(asteriskIconUrl)}");
+      background-position: center;
+      background-repeat: no-repeat;
+      background-size: 100%;
+      animation: passphrase-generate 1s calc(var(--offset) * 80ms) linear;
+    }
+
+    @keyframes passphrase-generate {
+      0% {
+        opacity: 0;
+        filter: blur(0.2em) hue-rotate(290deg);
+        scale: 0.6;
+        rotate: -120deg;
+      }
+      20% {
+        opacity: 1;
+        filter: blur(0.02em) hue-rotate(235eg);
+        scale: 0.9;
+      }
+      40% {
+        scale: 0.98;
+      }
+      48% {
+        scale: 1;
+      }
+      50% {
+        opacity: 1;
+        filter: blur(0) hue-rotate(180deg);
+        scale: 1;
+      }
+      52% {
+        scale: 1;
+      }
+      60% {
+        scale: 0.98;
+      }
+      80% {
+        opacity: 1;
+        filter: blur(0.02em) hue-rotate(90deg);
+        scale: 0.9;
+      }
+      100% {
+        opacity: 0;
+        filter: blur(0.2em) hue-rotate(0deg);
+        scale: 0.6;
+        rotate: 120deg;
+      }
     }
 
     .buttons {
@@ -122,6 +207,7 @@ export class PassphraseDisplay extends LitElement {
   passphrase?: string;
   options?: GenerationOptions;
 
+  generatePassphrase = false;
   showPassphrase = false;
   showCopyIndicator = false;
 
@@ -131,9 +217,26 @@ export class PassphraseDisplay extends LitElement {
 
   render() {
     return html`
-      <div class="${this.showPassphrase ? "show-passphrase" : ""}">
+      <div
+        class="${this.showPassphrase ? "show-passphrase" : ""} ${this
+          .generatePassphrase
+          ? "passphrase-generated"
+          : ""}"
+      >
         <div class="passphrase-container">
-          <span class="passphrase">${this.passphrase}</span>
+          <span class="passphrase"> ${this.passphrase} </span>
+          <div class="asterisk">
+            ${this.generatePassphrase
+              ? generateArray(
+                  5,
+                  (i) =>
+                    html`<div
+                      class="asterisk-icon"
+                      style="--offset: ${i}"
+                    ></div>`
+                )
+              : ""}
+          </div>
           <div class="buttons">
             <button
               class="toggle-passphrase-visibility"
@@ -148,6 +251,20 @@ export class PassphraseDisplay extends LitElement {
         </div>
       </div>
     `;
+  }
+
+  protected update(
+    changedProperties: PropertyValueMap<any> | Map<PropertyKey, unknown>
+  ): void {
+    if (changedProperties.has("passphrase")) {
+      this.generatePassphrase = false;
+      this.requestUpdate();
+      setTimeout(() => {
+        this.generatePassphrase = true;
+        this.requestUpdate();
+      });
+    }
+    super.update(changedProperties);
   }
 
   togglePassphraseVisibility() {
