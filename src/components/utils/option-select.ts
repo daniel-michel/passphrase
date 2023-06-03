@@ -99,6 +99,11 @@ export class OptionSelect<T> extends LitElement {
   constructor() {
     super();
     this.addEventListener("click", this.expand);
+    this.addEventListener("keydown", (event: KeyboardEvent) => {
+      if (event.key === "Enter") {
+        this.expand();
+      }
+    });
     this.setAttribute("tabindex", "0");
   }
 
@@ -106,6 +111,10 @@ export class OptionSelect<T> extends LitElement {
     this.#expanded = true;
     this.classList.add("expanded");
     this.requestUpdate();
+    this.removeAttribute("tabindex");
+    setTimeout(() => {
+      this.#selectedElement.focus();
+    });
   }
 
   itemClicked(event: Event, index: number) {
@@ -114,8 +123,10 @@ export class OptionSelect<T> extends LitElement {
     event.stopPropagation();
 
     this.selectedIndex = index;
-
     this.requestUpdate();
+
+    this.setAttribute("tabindex", "0");
+    this.focus();
 
     this.classList.remove("expanded");
     this.dispatchEvent(
@@ -132,13 +143,13 @@ export class OptionSelect<T> extends LitElement {
 
   render() {
     return html`<div
-      tabindex="0"
       class="container ${this.#expanded ? "expanded" : ""}"
       style="--item-count: ${this.options.length}; --selected-index: ${this.selectedIndex};"
     >
       ${this.options.map(
         (option, i) =>
           html`<button
+            ?inert="${!this.#expanded}"
             class="item"
             @click="${(event: Event) => this.itemClicked(event, i)}"
           >
