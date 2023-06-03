@@ -27,7 +27,7 @@ export class StrengthBar extends LitElement {
       border-radius: 0.3em;
       height: 100%;
       width: var(--percent);
-      transition: --strength 0.2s;
+      transition: --strength 0.5s;
     }
   `;
 
