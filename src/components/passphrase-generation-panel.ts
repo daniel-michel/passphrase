@@ -1,8 +1,15 @@
 import { html, css, LitElement } from "lit";
-import { PassphraseGenerationOptions } from "../passphrase-generator.js";
+import {
+  GenerationOptions,
+  PassphraseGenerationOptions,
+  PasswordGenerationOptions,
+} from "../passphrase-generator.js";
 import "./passphrase-settings.js";
+import "./password-settings.js";
 import "./passphrase-generator.js";
 import "./strength-calculation.js";
+import "./utils/radio-button-group.js";
+import { CHARACTER_SETS } from "../password-character-sets.js";
 
 export class PassphraseGenerationPanel extends LitElement {
   static styles = css`
@@ -15,13 +22,19 @@ export class PassphraseGenerationPanel extends LitElement {
     }
   `;
 
-  settings?: PassphraseGenerationOptions = undefined;
+  usedSettings?: GenerationOptions = undefined;
 
-  initialSettings: PassphraseGenerationOptions = {
+  generationType: "passphrase" | "password" = "passphrase";
+
+  passphraseSettings: PassphraseGenerationOptions = {
     words: [],
     count: 6,
     separator: " ",
     capitalize: false,
+  };
+  passwordSettings: PasswordGenerationOptions = {
+    characters: CHARACTER_SETS.All,
+    length: 30,
   };
 
   constructor() {
@@ -29,18 +42,53 @@ export class PassphraseGenerationPanel extends LitElement {
   }
 
   render() {
-    return html`<h2>Passphrase Generator</h2>
-      <passphrase-settings
-        .settings=${this.initialSettings}
-        @loading=${(e: CustomEvent) => this.updateSettings(undefined)}
-        @settings=${(e: CustomEvent) => this.updateSettings(e.detail.settings)}
-      ></passphrase-settings>
-      <strength-calculation .options=${this.settings}></strength-calculation>
-      <passphrase-generator .settings=${this.settings}></passphrase-generator>`;
+    return html` <center>
+        <radio-button-group
+          .options=${[
+            ["passphrase", "Passphrase"],
+            ["password", "Password"],
+          ]}
+          .selected=${this.generationType === "passphrase" ? 0 : 1}
+          .renderItem=${([value, label]: [string, string]) => html`${label}`}
+          @option-selected=${({
+            detail: { selected },
+          }: CustomEvent<{ selected: [string, string] }>) => {
+            this.generationType = selected[0] as "passphrase" | "password";
+            this.updateSettings(
+              this.generationType === "passphrase"
+                ? this.passphraseSettings
+                : this.passwordSettings
+            );
+            this.requestUpdate();
+          }}
+        ></radio-button-group>
+      </center>
+      <h2>
+        ${this.generationType === "passphrase" ? "Passphrase" : "Password"}
+        Generator
+      </h2>
+      ${this.generationType === "passphrase"
+        ? html`<passphrase-settings
+            .settings=${this.passphraseSettings}
+            @loading=${(e: CustomEvent) => this.updateSettings(undefined)}
+            @settings=${(e: CustomEvent) =>
+              this.updateSettings(e.detail.settings)}
+          ></passphrase-settings>`
+        : html`<password-settings
+            .settings=${this.passwordSettings}
+            @settings=${(e: CustomEvent) =>
+              this.updateSettings(e.detail.settings)}
+          ></password-settings>`}
+      <strength-calculation
+        .options=${this.usedSettings}
+      ></strength-calculation>
+      <passphrase-generator
+        .settings=${this.usedSettings}
+      ></passphrase-generator>`;
   }
 
-  updateSettings(settings?: PassphraseGenerationOptions) {
-    this.settings = structuredClone(settings);
+  updateSettings(settings?: GenerationOptions) {
+    this.usedSettings = structuredClone(settings);
     this.requestUpdate();
   }
 }

@@ -1,10 +1,4 @@
-import {
-  LitElement,
-  html,
-  css,
-  TemplateResult,
-  unsafeCSS,
-} from "lit";
+import { LitElement, html, css, TemplateResult, unsafeCSS } from "lit";
 import { createDataUrl } from "../../utils/url.js";
 
 const iconSvg = `<svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 0 24 24" width="24px" fill="#FFFFFF"><path d="M0 0h24v24H0V0z" fill="none"/><path d="M12 5.83L15.17 9l1.41-1.41L12 3 7.41 7.59 8.83 9 12 5.83zm0 12.34L8.83 15l-1.41 1.41L12 21l4.59-4.59L15.17 15 12 18.17z"/></svg>`;
@@ -34,15 +28,23 @@ export class OptionSelect<T> extends LitElement {
       position: relative;
       --item-count: 1;
       --selected-index: 0;
-      --top-offset: calc(var(--selected-index) / var(--item-count) * 100%);
-      --bottom-offset: calc((var(--item-count) - var(--selected-index) - 1) / var(--item-count) * 100%);
-      clip-path: inset(var(--top-offset) 0 var(--bottom-offset) 0 round var(--border-radius));
-      transform: translateY(calc(-1 * var(--top-offset) - 50% / var(--item-count)));
+      --used-index: max(min(var(--selected-index), var(--item-count) - 1), 0);
+      --top-offset: calc(var(--used-index) / var(--item-count) * 100%);
+      --bottom-offset: calc(
+        (var(--item-count) - var(--used-index) - 1) / var(--item-count) * 100%
+      );
+      clip-path: inset(
+        var(--top-offset) 0 var(--bottom-offset) 0 round var(--border-radius)
+      );
+      transform: translateY(
+        calc(-1 * var(--top-offset) - 50% / var(--item-count))
+      );
       top: 50%;
       transition: clip-path 0.2s, transform 0.2s;
     }
     .container.expanded {
       clip-path: inset(0 0 0 0 round var(--border-radius));
+      z-index: 10000;
     }
     .item {
       border: none;
@@ -73,6 +75,7 @@ export class OptionSelect<T> extends LitElement {
       right: 0;
       top: 0;
       pointer-events: none;
+      z-index: 10001;
     }
   `;
 
@@ -144,7 +147,8 @@ export class OptionSelect<T> extends LitElement {
   render() {
     return html`<div
       class="container ${this.#expanded ? "expanded" : ""}"
-      style="--item-count: ${this.options.length}; --selected-index: ${this.selectedIndex};"
+      style="--item-count: ${this.options.length}; --selected-index: ${this
+        .selectedIndex};"
     >
       ${this.options.map(
         (option, i) =>

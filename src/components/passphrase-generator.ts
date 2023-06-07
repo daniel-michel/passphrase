@@ -2,9 +2,10 @@ import { html, css, LitElement, unsafeCSS, PropertyValueMap } from "lit";
 import { createDataUrl } from "../utils/url.js";
 import {
   GenerationOptions,
-  PassphraseGenerationOptions,
   entropyForOptions,
   generatePassphrase,
+  generatePassword,
+  isPassphraseOptions,
 } from "../passphrase-generator.js";
 import "./passphrase-display.js";
 
@@ -41,7 +42,7 @@ export class PassphraseGenerator extends LitElement {
     };
   }
 
-  settings?: PassphraseGenerationOptions;
+  settings?: GenerationOptions;
 
   passphrase?: string;
   optionsUsedForCurrentPassphrase?: GenerationOptions;
@@ -55,8 +56,12 @@ export class PassphraseGenerator extends LitElement {
   protected update(
     changedProperties: PropertyValueMap<any> | Map<PropertyKey, unknown>
   ): void {
+    const newSettings: GenerationOptions = changedProperties.get("settings");
     if (
-      changedProperties.get("settings")?.words.length !== 0 &&
+      (!newSettings ||
+        (isPassphraseOptions(newSettings)
+          ? newSettings.words.length !== 0
+          : newSettings.characters.length !== 0)) &&
       !this.passphrase
     ) {
       this.generate();
@@ -68,7 +73,10 @@ export class PassphraseGenerator extends LitElement {
     return html`
       <button
         id="generate"
-        ?disabled=${!this.settings || this.settings.words.length === 0}
+        ?disabled=${!this.settings ||
+        (isPassphraseOptions(this.settings)
+          ? this.settings.words.length === 0
+          : this.settings.characters.length === 0)}
         @click=${this.generate}
       >
         Generate
@@ -95,7 +103,9 @@ export class PassphraseGenerator extends LitElement {
 
   generate() {
     if (!this.settings) return;
-    this.passphrase = generatePassphrase(this.settings);
+    this.passphrase = isPassphraseOptions(this.settings)
+      ? generatePassphrase(this.settings)
+      : generatePassword(this.settings);
     this.optionsUsedForCurrentPassphrase = structuredClone(this.settings);
     this.requestUpdate();
   }

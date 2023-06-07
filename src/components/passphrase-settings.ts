@@ -20,7 +20,7 @@ export class PassphraseSettings extends LitElement {
       font-size: 0.9rem;
       padding: 0.5em 0.7em;
       border: none;
-      border-radius: .3em;
+      border-radius: 0.3em;
     }
   `;
 
@@ -30,10 +30,10 @@ export class PassphraseSettings extends LitElement {
     };
   }
 
-  settings: PassphraseGenerationOptions = {
+  settings: PassphraseGenerationOptions & { filename?: string } = {
     words: [],
-    count: 6,
-    separator: " ",
+    count: 0,
+    separator: "",
     capitalize: false,
   };
 
@@ -47,8 +47,11 @@ export class PassphraseSettings extends LitElement {
 
   constructor() {
     super();
-    this.availableWordLists.then((wordLists) => {
-      this.loadFile(wordLists[0].file);
+    this.availableWordLists.then(async (wordLists) => {
+      if (!this.settings.filename) {
+        await this.loadFile(wordLists[0].file);
+        this.requestUpdate();
+      }
     });
   }
 
@@ -61,10 +64,13 @@ export class PassphraseSettings extends LitElement {
           <option-select
             id="word-list"
             name="word-list"
+            .options=${wordLists}
+            .selectedIndex=${wordLists.findIndex(
+              (wordList) => wordList.file === this.settings.filename
+            )}
             @option-selected=${(e: CustomEvent) => {
               this.loadFile(e.detail.selected.file);
             }}
-            .options=${wordLists}
             .renderItem=${({ file, name }: { file: string; name: string }) =>
               html`<div>${name}</div>`}
           ></option-select>
@@ -114,6 +120,7 @@ export class PassphraseSettings extends LitElement {
       .filter((v) => v)
       .map((line) => line.replace(/^\d+\s+/, ""));
     this.settings.words = words;
+    this.settings.filename = file;
     this.dispatchSettings();
     this.#loading = false;
   }

@@ -202,8 +202,6 @@ export class PassphraseDisplay extends LitElement {
     };
   }
 
-  settings?: PassphraseGenerationOptions;
-
   passphrase?: string;
   options?: GenerationOptions;
 
