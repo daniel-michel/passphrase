@@ -9,7 +9,7 @@ import "./password-settings.js";
 import "./passphrase-generator.js";
 import "./strength-calculation.js";
 import "./utils/radio-button-group.js";
-import { CHARACTER_SETS } from "../password-character-sets.js";
+import { CharacterSets } from "../password-character-sets.js";
 
 export class PassphraseGenerationPanel extends LitElement {
   static styles = css`
@@ -33,7 +33,7 @@ export class PassphraseGenerationPanel extends LitElement {
     capitalize: false,
   };
   passwordSettings: PasswordGenerationOptions = {
-    characters: CHARACTER_SETS.All,
+    characters: CharacterSets.All,
     length: 30,
   };
 

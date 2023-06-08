@@ -6,7 +6,7 @@ import {
 import "./note.js";
 import "./utils/option-select.js";
 import "./utils/async-loaded.js";
-import { CHARACTER_SETS } from "../password-character-sets.js";
+import { CharacterSets } from "../password-character-sets.js";
 
 export class PasswordSettings extends LitElement {
   static styles = css`
@@ -49,8 +49,8 @@ export class PasswordSettings extends LitElement {
       <option-select
         id="word-list"
         name="word-list"
-        .options=${Object.entries(CHARACTER_SETS)}
-        .selectedIndex=${Object.values(CHARACTER_SETS).indexOf(
+        .options=${Object.entries(CharacterSets)}
+        .selectedIndex=${Object.values(CharacterSets).indexOf(
           this.settings.characters
         )}
         @option-selected=${({

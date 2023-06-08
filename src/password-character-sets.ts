@@ -15,23 +15,25 @@ function generateCharacterSet(range: string) {
     String.fromCharCode(startCode + index)
   ).join("");
 }
-export const CHARACTER_SETS = (() => {
+export const CharacterSets = (() => {
   const Lowercase = generateCharacterSet("az");
   const Uppercase = generateCharacterSet("AZ");
   const Digits = generateCharacterSet("09");
   const Symbols = generateCharacterSets(["!/", ":@", "[`", "{~"]);
   const Basic = Lowercase + Uppercase + Digits + "_";
-  const BasicWithNumbers = Basic + Digits;
-  const BasicWithSymbols = Basic + Symbols;
   const All = generateCharacterSet(" ~");
-  return {
+  const CharacterSets = {
     All,
     Basic,
-    "Basic with numbers": BasicWithNumbers,
-    "Basic with symbols": BasicWithSymbols,
     Lowercase,
     Uppercase,
     Digits,
     Symbols,
   };
+  for (const [name, set] of Object.entries(CharacterSets)) {
+    if (set.length !== new Set(set).size) {
+      throw new Error(`character set "${name}" contains duplicate characters`);
+    }
+  }
+  return CharacterSets;
 })();
