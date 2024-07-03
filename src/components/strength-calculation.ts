@@ -5,8 +5,9 @@ import {
 	isPassphraseOptions,
 } from "../passphrase-generator.js";
 import "./note.js";
-import { property } from "lit/decorators.js";
+import { customElement, property } from "lit/decorators.js";
 
+@customElement("strength-calculation")
 export class StrengthCalculation extends LitElement {
 	static styles = css`
 		.total-number {
@@ -64,5 +65,3 @@ export class StrengthCalculation extends LitElement {
 		`;
 	}
 }
-
-customElements.define("strength-calculation", StrengthCalculation);

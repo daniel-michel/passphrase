@@ -3,8 +3,9 @@ import { PassphraseGenerationOptions } from "../passphrase-generator.js";
 import "./note.js";
 import "./utils/option-select.js";
 import "./utils/async-loaded.js";
-import { property } from "lit/decorators.js";
+import { customElement, property } from "lit/decorators.js";
 
+@customElement("passphrase-settings")
 export class PassphraseSettings extends LitElement {
 	static styles = css`
 		div {
@@ -147,5 +148,3 @@ export class PassphraseSettings extends LitElement {
 		);
 	}
 }
-
-customElements.define("passphrase-settings", PassphraseSettings);

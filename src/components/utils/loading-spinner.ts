@@ -1,5 +1,7 @@
 import { LitElement, html, css } from "lit";
+import { customElement } from "lit/decorators.js";
 
+@customElement("loading-spinner")
 export class LoadingSpinner extends LitElement {
 	static styles = css`
 		:host {
@@ -72,5 +74,3 @@ export class LoadingSpinner extends LitElement {
 		</div>`;
 	}
 }
-
-customElements.define("loading-spinner", LoadingSpinner);

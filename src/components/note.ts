@@ -1,5 +1,7 @@
 import { html, css, LitElement } from "lit";
+import { customElement } from "lit/decorators.js";
 
+@customElement("info-note")
 export class AppRoot extends LitElement {
 	static styles = css`
 		div {
@@ -21,5 +23,3 @@ export class AppRoot extends LitElement {
 		return html`<div><slot></slot></div>`;
 	}
 }
-
-customElements.define("info-note", AppRoot);

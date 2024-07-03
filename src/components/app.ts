@@ -1,7 +1,9 @@
 import { html, css, LitElement } from "lit";
 import "./passphrase-generation-panel.js";
 import "./panel.js";
+import { customElement } from "lit/decorators.js";
 
+@customElement("app-root")
 export class AppRoot extends LitElement {
 	static styles = css`
 		div {
@@ -25,5 +27,3 @@ export class AppRoot extends LitElement {
 		</div>`;
 	}
 }
-
-customElements.define("app-root", AppRoot);

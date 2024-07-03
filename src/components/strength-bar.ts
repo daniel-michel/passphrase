@@ -3,17 +3,12 @@ import {
 	GenerationOptions,
 	entropyForOptions,
 } from "../passphrase-generator.js";
-import { property } from "lit/decorators.js";
+import { customElement, property } from "lit/decorators.js";
 
+@customElement("strength-bar")
 export class StrengthBar extends LitElement {
 	static styles = css`
 		.bar {
-			/*background: linear-gradient(
-        to right in lab,
-        hsl(0, 100%, 55%),
-        yellow 70%,
-        hsl(120, 80%, 60%)
-      );*/
 			background-color: hsl(0, 0%, 23%);
 			border-radius: 0.3em;
 			height: 0.5em;
@@ -21,9 +16,9 @@ export class StrengthBar extends LitElement {
 		.fill {
 			--percent: min(calc(var(--strength) * 1%), 100%);
 			background-color: color-mix(
-				in lab,
-				hsl(0, 100%, 55%),
-				hsl(120, 80%, 60%) var(--percent)
+				in oklch,
+				oklch(74.93% 0.1246 28.31),
+				oklch(74.93% 0.1246 139.41) var(--percent)
 			);
 			border-radius: 0.3em;
 			height: 100%;
@@ -48,5 +43,3 @@ export class StrengthBar extends LitElement {
 		`;
 	}
 }
-
-customElements.define("strength-bar", StrengthBar);

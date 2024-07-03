@@ -1,5 +1,7 @@
 import { html, css, LitElement } from "lit";
+import { customElement } from "lit/decorators.js";
 
+@customElement("content-panel")
 export class Panel extends LitElement {
 	static styles = css`
 		div {
@@ -21,5 +23,3 @@ export class Panel extends LitElement {
 		return html`<div><slot></slot></div>`;
 	}
 }
-
-customElements.define("content-panel", Panel);

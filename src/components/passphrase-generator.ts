@@ -7,8 +7,9 @@ import {
 	isPassphraseOptions,
 } from "../passphrase-generator.js";
 import "./passphrase-display.js";
-import { property } from "lit/decorators.js";
+import { customElement, property } from "lit/decorators.js";
 
+@customElement("passphrase-generator")
 export class PassphraseGenerator extends LitElement {
 	static styles = css`
 		button {
@@ -106,5 +107,3 @@ export class PassphraseGenerator extends LitElement {
 		this.requestUpdate();
 	}
 }
-
-customElements.define("passphrase-generator", PassphraseGenerator);

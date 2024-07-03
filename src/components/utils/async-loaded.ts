@@ -6,13 +6,14 @@ import {
 	TemplateResult,
 } from "lit";
 import "./loading-spinner.js";
-import { property } from "lit/decorators.js";
+import { customElement, property } from "lit/decorators.js";
 
+@customElement("async-loaded")
 export class AsyncLoaded<T> extends LitElement {
 	static styles = css``;
 
 	@property({ attribute: false })
-	promise: Promise<T> = new Promise<T>(() => {});
+	promise?: Promise<T>;
 	@property()
 	renderLoaded: (value: T) => TemplateResult = () => html``;
 	#resolvedValue: T | undefined;
@@ -27,11 +28,15 @@ export class AsyncLoaded<T> extends LitElement {
 		options?: PropertyDeclaration<unknown, unknown> | undefined,
 	): void {
 		if (name === "promise") {
-			this.#resolvedValue = undefined;
-			this.requestUpdate();
-			this.promise.then((value) => {
+			try {
+				this.#resolvedValue = undefined;
+			} catch (error) {
+				return;
+			}
+			super.requestUpdate();
+			this.promise?.then((value) => {
 				this.#resolvedValue = value;
-				this.requestUpdate();
+				super.requestUpdate();
 			});
 		}
 		super.requestUpdate(name, oldValue, options);
@@ -43,5 +48,3 @@ export class AsyncLoaded<T> extends LitElement {
 			: this.renderLoaded(this.#resolvedValue);
 	}
 }
-
-customElements.define("async-loaded", AsyncLoaded);

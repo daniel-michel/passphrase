@@ -1,6 +1,7 @@
 import { html, css, LitElement } from "lit";
-import { property } from "lit/decorators.js";
+import { customElement, property } from "lit/decorators.js";
 
+@customElement("tooltip-toast")
 export class TooltipToast extends LitElement {
 	static styles = css`
 		:host {
@@ -45,5 +46,3 @@ export class TooltipToast extends LitElement {
 		`;
 	}
 }
-
-customElements.define("tooltip-toast", TooltipToast);

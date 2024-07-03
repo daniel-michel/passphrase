@@ -3,7 +3,7 @@ import { createDataUrl } from "../utils/url.js";
 import { GenerationOptions, generateArray } from "../passphrase-generator.js";
 import "./utils/tooltip-toast.js";
 import "./strength-bar.js";
-import { property } from "lit/decorators.js";
+import { customElement, property } from "lit/decorators.js";
 
 const copyIconSvg = `<svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 0 24 24" width="24px" fill="#FFFFFF"><path d="M0 0h24v24H0z" fill="none"/><path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z"/></svg>`;
 const copyIconUrl = createDataUrl(copyIconSvg, "image/svg+xml");
@@ -17,6 +17,7 @@ const hiddenIconUrl = createDataUrl(hiddenIconSvg, "image/svg+xml");
 const asteriskIconSvg = `<svg xmlns="http://www.w3.org/2000/svg" height="48" viewBox="0 -960 960 960" width="48" fill="#47eb47"><path d="M426-136v-250L210-261l-55-93 217-126-216-125 54-93 216 125v-251h108v251l216-125 54 93-216 125 217 126-55 93-216-125v250H426Z"/></svg>`;
 const asteriskIconUrl = createDataUrl(asteriskIconSvg, "image/svg+xml");
 
+@customElement("passphrase-display")
 export class PassphraseDisplay extends LitElement {
 	static styles = css`
 		:host > * {
@@ -273,5 +274,3 @@ export class PassphraseDisplay extends LitElement {
 		}, 2000);
 	}
 }
-
-customElements.define("passphrase-display", PassphraseDisplay);

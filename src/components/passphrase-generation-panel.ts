@@ -10,7 +10,9 @@ import "./passphrase-generator.js";
 import "./strength-calculation.js";
 import "./utils/radio-button-group.js";
 import { CharacterSets } from "../password-character-sets.js";
+import { customElement } from "lit/decorators.js";
 
+@customElement("passphrase-generation-panel")
 export class PassphraseGenerationPanel extends LitElement {
 	static styles = css`
 		div {
@@ -97,5 +99,3 @@ export class PassphraseGenerationPanel extends LitElement {
 		this.requestUpdate();
 	}
 }
-
-customElements.define("passphrase-generation-panel", PassphraseGenerationPanel);

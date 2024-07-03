@@ -1,6 +1,7 @@
 import { LitElement, html, css, TemplateResult } from "lit";
-import { property } from "lit/decorators.js";
+import { customElement, property } from "lit/decorators.js";
 
+@customElement("radio-button-group")
 export class RadioButtonGroup<T> extends LitElement {
 	static styles = css`
 		.container {
@@ -80,5 +81,3 @@ export class RadioButtonGroup<T> extends LitElement {
 		</div>`;
 	}
 }
-
-customElements.define("radio-button-group", RadioButtonGroup);

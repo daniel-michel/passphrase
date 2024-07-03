@@ -4,8 +4,9 @@ import "./note.js";
 import "./utils/option-select.js";
 import "./utils/async-loaded.js";
 import { CharacterSets } from "../password-character-sets.js";
-import { property } from "lit/decorators.js";
+import { customElement, property } from "lit/decorators.js";
 
+@customElement("password-settings")
 export class PasswordSettings extends LitElement {
 	static styles = css`
 		div {
@@ -103,5 +104,3 @@ export class PasswordSettings extends LitElement {
 		);
 	}
 }
-
-customElements.define("password-settings", PasswordSettings);
