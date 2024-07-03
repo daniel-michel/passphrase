@@ -20,6 +20,11 @@ export class PassphraseGenerationPanel extends LitElement {
       align-content: center;
       min-height: 100%;
     }
+
+    nav {
+      display: grid;
+      justify-content: center;
+    }
   `;
 
   usedSettings?: GenerationOptions = undefined;
@@ -42,14 +47,14 @@ export class PassphraseGenerationPanel extends LitElement {
   }
 
   render() {
-    return html` <center>
+    return html`<nav>
         <radio-button-group
           .options=${[
             ["passphrase", "Passphrase"],
             ["password", "Password"],
           ]}
           .selected=${this.generationType === "passphrase" ? 0 : 1}
-          .renderItem=${([value, label]: [string, string]) => html`${label}`}
+          .renderItem=${([, label]: [string, string]) => html`${label}`}
           @option-selected=${({
             detail: { selected },
           }: CustomEvent<{ selected: [string, string] }>) => {
@@ -62,7 +67,7 @@ export class PassphraseGenerationPanel extends LitElement {
             this.requestUpdate();
           }}
         ></radio-button-group>
-      </center>
+      </nav>
       <h2>
         ${this.generationType === "passphrase" ? "Passphrase" : "Password"}
         Generator
@@ -70,7 +75,7 @@ export class PassphraseGenerationPanel extends LitElement {
       ${this.generationType === "passphrase"
         ? html`<passphrase-settings
             .settings=${this.passphraseSettings}
-            @loading=${(e: CustomEvent) => this.updateSettings(undefined)}
+            @loading=${() => this.updateSettings(undefined)}
             @settings=${(e: CustomEvent) =>
               this.updateSettings(e.detail.settings)}
           ></passphrase-settings>`

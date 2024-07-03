@@ -1,14 +1,21 @@
 {
-  "scripts": {
-    "build-prod": "npm run build -- --sourceMap false --declaration false --removeComments true",
-    "build": "tsc",
-    "watch": "tsc --watch",
-    "clean": "cd dist && git clean -dfX"
-  },
-  "devDependencies": {
-    "typescript": "^5.0.4"
-  },
-  "dependencies": {
-    "lit": "^2.7.4"
-  }
+	"name": "passphrase-generator",
+	"private": true,
+	"version": "0.0.0",
+	"type": "module",
+	"scripts": {
+		"dev": "vite",
+		"watch": "tsc --watch --noEmit",
+		"build": "tsc && vite build",
+		"preview": "vite preview",
+		"format": "prettier -w ."
+	},
+	"dependencies": {
+		"lit": "^3.1.4"
+	},
+	"devDependencies": {
+		"prettier": "^3.3.2",
+		"typescript": "^5.2.2",
+		"vite": "^5.3.1"
+	}
 }

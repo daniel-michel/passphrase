@@ -1,12 +1,9 @@
 import { html, css, LitElement, unsafeCSS, PropertyValueMap } from "lit";
 import { createDataUrl } from "../utils/url.js";
-import {
-  GenerationOptions,
-  PassphraseGenerationOptions,
-  generateArray,
-} from "../passphrase-generator.js";
+import { GenerationOptions, generateArray } from "../passphrase-generator.js";
 import "./utils/tooltip-toast.js";
 import "./strength-bar.js";
+import { property } from "lit/decorators.js";
 
 const copyIconSvg = `<svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 0 24 24" width="24px" fill="#FFFFFF"><path d="M0 0h24v24H0z" fill="none"/><path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z"/></svg>`;
 const copyIconUrl = createDataUrl(copyIconSvg, "image/svg+xml");
@@ -21,265 +18,260 @@ const asteriskIconSvg = `<svg xmlns="http://www.w3.org/2000/svg" height="48" vie
 const asteriskIconUrl = createDataUrl(asteriskIconSvg, "image/svg+xml");
 
 export class PassphraseDisplay extends LitElement {
-  static styles = css`
-    :host > * {
-      margin: 0.5em 0;
-    }
+	static styles = css`
+		:host > * {
+			margin: 0.5em 0;
+		}
 
-    button {
-      border: none;
-      font-size: 1em;
-      background-color: hsl(0, 0%, 23%);
-      border-radius: 0.3em;
-    }
+		button {
+			border: none;
+			font-size: 1em;
+			background-color: hsl(0, 0%, 23%);
+			border-radius: 0.3em;
+		}
 
-    .passphrase-container {
-      display: grid;
-      gap: 0.8em;
-      grid-template-columns: 1fr auto;
-      position: relative;
-      background-color: hsl(0, 0%, 13%);
-      padding: 0.8em;
-      min-height: 1.2em;
-      border-radius: 0.3em;
-      text-align: center;
-      justify-content: center;
-      align-items: center;
-    }
-    .passphrase-container::before {
-      content: "";
-      background-color: hsl(0, 0%, 31%);
-      /* backdrop-filter: blur(5px); */
-      position: absolute;
-      width: 100%;
-      height: 100%;
-      top: 0;
-      left: 0;
-      display: grid;
-      justify-content: center;
-      align-content: center;
-      border-radius: 0.3em;
-      opacity: 1;
-      pointer-events: none;
-      transition: opacity 0.1s 0s;
-    }
-    .show-passphrase .passphrase-container::before {
-      opacity: 0;
-    }
+		.passphrase-container {
+			display: grid;
+			gap: 0.8em;
+			grid-template-columns: 1fr auto;
+			position: relative;
+			background-color: hsl(0, 0%, 13%);
+			padding: 0.8em;
+			min-height: 1.2em;
+			border-radius: 0.3em;
+			text-align: center;
+			justify-content: center;
+			align-items: center;
+		}
+		.passphrase-container::before {
+			content: "";
+			background-color: hsl(0, 0%, 31%);
+			/* backdrop-filter: blur(5px); */
+			position: absolute;
+			width: 100%;
+			height: 100%;
+			top: 0;
+			left: 0;
+			display: grid;
+			justify-content: center;
+			align-content: center;
+			border-radius: 0.3em;
+			opacity: 1;
+			pointer-events: none;
+			transition: opacity 0.1s 0s;
+		}
+		.show-passphrase .passphrase-container::before {
+			opacity: 0;
+		}
 
-    .passphrase {
-      opacity: 0;
-      padding: 0 0.8em;
-      grid-column: 1 / 1;
-      grid-row: 1 / 1;
-    }
-    .passphrase-generated .passphrase {
-      opacity: 1;
-      animation: fade-in 0.8s 1s ease-out backwards;
-    }
-    @keyframes fade-in {
-      0% {
-        color: transparent;
-      }
-      100% {
-        color: white;
-      }
-    }
+		.passphrase {
+			opacity: 0;
+			padding: 0 0.8em;
+			grid-column: 1 / 1;
+			grid-row: 1 / 1;
+		}
+		.passphrase-generated .passphrase {
+			opacity: 1;
+			animation: fade-in 0.8s 1s ease-out backwards;
+		}
+		@keyframes fade-in {
+			0% {
+				color: transparent;
+			}
+			100% {
+				color: white;
+			}
+		}
 
-    .asterisk {
-      pointer-events: none;
-      grid-column: 1 / 1;
-      grid-row: 1 / 1;
-      display: grid;
-      z-index: 1;
-      height: 100%;
-      min-height: 0;
-      max-height: 100%;
-      grid-auto-flow: column;
-      align-items: center;
-      justify-content: center;
-    }
-    .asterisk-icon {
-      opacity: 0;
-      aspect-ratio: 1;
-      height: 1.7em;
-      background-image: url("${unsafeCSS(asteriskIconUrl)}");
-      background-position: center;
-      background-repeat: no-repeat;
-      background-size: 100%;
-      animation: passphrase-generate 1s calc(var(--offset) * 80ms) linear;
-    }
+		.asterisk {
+			pointer-events: none;
+			grid-column: 1 / 1;
+			grid-row: 1 / 1;
+			display: grid;
+			z-index: 1;
+			height: 100%;
+			min-height: 0;
+			max-height: 100%;
+			grid-auto-flow: column;
+			align-items: center;
+			justify-content: center;
+		}
+		.asterisk-icon {
+			opacity: 0;
+			aspect-ratio: 1;
+			height: 1.7em;
+			background-image: url("${unsafeCSS(asteriskIconUrl)}");
+			background-position: center;
+			background-repeat: no-repeat;
+			background-size: 100%;
+			animation: passphrase-generate 1s calc(var(--offset) * 80ms) linear;
+		}
 
-    @keyframes passphrase-generate {
-      0% {
-        opacity: 0;
-        filter: blur(0.2em) hue-rotate(290deg);
-        scale: 0.6;
-        rotate: -120deg;
-      }
-      20% {
-        opacity: 1;
-        filter: blur(0.02em) hue-rotate(235eg);
-        scale: 0.9;
-      }
-      40% {
-        scale: 0.98;
-      }
-      48% {
-        scale: 1;
-      }
-      50% {
-        opacity: 1;
-        filter: blur(0) hue-rotate(180deg);
-        scale: 1;
-      }
-      52% {
-        scale: 1;
-      }
-      60% {
-        scale: 0.98;
-      }
-      80% {
-        opacity: 1;
-        filter: blur(0.02em) hue-rotate(90deg);
-        scale: 0.9;
-      }
-      100% {
-        opacity: 0;
-        filter: blur(0.2em) hue-rotate(0deg);
-        scale: 0.6;
-        rotate: 120deg;
-      }
-    }
+		@keyframes passphrase-generate {
+			0% {
+				opacity: 0;
+				filter: blur(0.2em) hue-rotate(290deg);
+				scale: 0.6;
+				rotate: -120deg;
+			}
+			20% {
+				opacity: 1;
+				filter: blur(0.02em) hue-rotate(235eg);
+				scale: 0.9;
+			}
+			40% {
+				scale: 0.98;
+			}
+			48% {
+				scale: 1;
+			}
+			50% {
+				opacity: 1;
+				filter: blur(0) hue-rotate(180deg);
+				scale: 1;
+			}
+			52% {
+				scale: 1;
+			}
+			60% {
+				scale: 0.98;
+			}
+			80% {
+				opacity: 1;
+				filter: blur(0.02em) hue-rotate(90deg);
+				scale: 0.9;
+			}
+			100% {
+				opacity: 0;
+				filter: blur(0.2em) hue-rotate(0deg);
+				scale: 0.6;
+				rotate: 120deg;
+			}
+		}
 
-    .buttons {
-      display: grid;
-      grid-auto-flow: column;
-      gap: 0.5em;
-      align-items: center;
-      width: fit-content;
-      z-index: 1;
-    }
-    .buttons > * {
-      height: 2.5em;
-      width: 2.5em;
-    }
+		.buttons {
+			display: grid;
+			grid-auto-flow: column;
+			gap: 0.5em;
+			align-items: center;
+			width: fit-content;
+			z-index: 1;
+		}
+		.buttons > * {
+			height: 2.5em;
+			width: 2.5em;
+		}
 
-    .toggle-passphrase-visibility {
-      background-image: url("${unsafeCSS(hiddenIconUrl)}");
-      background-position: center;
-      background-repeat: no-repeat;
-      background-size: 50%;
-    }
-    .show-passphrase .toggle-passphrase-visibility {
-      background-image: url("${unsafeCSS(visibleIconUrl)}");
-    }
+		.toggle-passphrase-visibility {
+			background-image: url("${unsafeCSS(hiddenIconUrl)}");
+			background-position: center;
+			background-repeat: no-repeat;
+			background-size: 50%;
+		}
+		.show-passphrase .toggle-passphrase-visibility {
+			background-image: url("${unsafeCSS(visibleIconUrl)}");
+		}
 
-    .copy {
-      padding: 0;
-      aspect-ratio: 1;
-      height: 100%;
-      background-image: url("${unsafeCSS(copyIconUrl)}");
-      background-position: center;
-      background-repeat: no-repeat;
-      background-size: 50%;
-      min-height: 0;
-    }
-    .copy-slot {
-      writing-mode: horizontal-tb;
-    }
+		.copy {
+			padding: 0;
+			aspect-ratio: 1;
+			height: 100%;
+			background-image: url("${unsafeCSS(copyIconUrl)}");
+			background-position: center;
+			background-repeat: no-repeat;
+			background-size: 50%;
+			min-height: 0;
+		}
+		.copy-slot {
+			writing-mode: horizontal-tb;
+		}
 
-    strength-bar {
-      grid-column: 1 / -1;
-      z-index: 1;
-    }
-  `;
+		strength-bar {
+			grid-column: 1 / -1;
+			z-index: 1;
+		}
+	`;
 
-  static get properties() {
-    return {
-      options: { type: Object },
-      passphrase: { type: String },
-    };
-  }
+	@property()
+	passphrase?: string;
+	@property({ attribute: false })
+	options?: GenerationOptions;
 
-  passphrase?: string;
-  options?: GenerationOptions;
+	generatePassphrase = false;
+	showPassphrase = false;
+	showCopyIndicator = false;
 
-  generatePassphrase = false;
-  showPassphrase = false;
-  showCopyIndicator = false;
+	constructor() {
+		super();
+	}
 
-  constructor() {
-    super();
-  }
+	render() {
+		return html`
+			<div
+				class="${this.showPassphrase ? "show-passphrase" : ""} ${this
+					.generatePassphrase
+					? "passphrase-generated"
+					: ""}"
+			>
+				<div class="passphrase-container">
+					<span class="passphrase"> ${this.passphrase} </span>
+					<div class="asterisk">
+						${this.generatePassphrase
+							? generateArray(
+									5,
+									(i) =>
+										html`<div
+											class="asterisk-icon"
+											style="--offset: ${i}"
+										></div>`,
+								)
+							: ""}
+					</div>
+					<div class="buttons">
+						<button
+							class="toggle-passphrase-visibility"
+							@click=${this.togglePassphraseVisibility}
+						></button>
+						<tooltip-toast .show=${this.showCopyIndicator}>
+							<button class="copy" @click=${this.copyToClipboard}></button>
+							<div slot="indicator" class="copy-slot">Copied</div>
+						</tooltip-toast>
+					</div>
+					<strength-bar .options=${this.options}></strength-bar>
+				</div>
+			</div>
+		`;
+	}
 
-  render() {
-    return html`
-      <div
-        class="${this.showPassphrase ? "show-passphrase" : ""} ${this
-          .generatePassphrase
-          ? "passphrase-generated"
-          : ""}"
-      >
-        <div class="passphrase-container">
-          <span class="passphrase"> ${this.passphrase} </span>
-          <div class="asterisk">
-            ${this.generatePassphrase
-              ? generateArray(
-                  5,
-                  (i) =>
-                    html`<div
-                      class="asterisk-icon"
-                      style="--offset: ${i}"
-                    ></div>`
-                )
-              : ""}
-          </div>
-          <div class="buttons">
-            <button
-              class="toggle-passphrase-visibility"
-              @click=${this.togglePassphraseVisibility}
-            ></button>
-            <tooltip-toast .show=${this.showCopyIndicator}>
-              <button class="copy" @click=${this.copyToClipboard}></button>
-              <div slot="indicator" class="copy-slot">Copied</div>
-            </tooltip-toast>
-          </div>
-          <strength-bar .options=${this.options}></strength-bar>
-        </div>
-      </div>
-    `;
-  }
+	protected update(
+		changedProperties: PropertyValueMap<any> | Map<PropertyKey, unknown>,
+	): void {
+		if (changedProperties.has("passphrase")) {
+			this.generatePassphrase = false;
+			this.requestUpdate();
+			setTimeout(() => {
+				this.generatePassphrase = true;
+				this.requestUpdate();
+			});
+		}
+		super.update(changedProperties);
+	}
 
-  protected update(
-    changedProperties: PropertyValueMap<any> | Map<PropertyKey, unknown>
-  ): void {
-    if (changedProperties.has("passphrase")) {
-      this.generatePassphrase = false;
-      this.requestUpdate();
-      setTimeout(() => {
-        this.generatePassphrase = true;
-        this.requestUpdate();
-      });
-    }
-    super.update(changedProperties);
-  }
+	togglePassphraseVisibility() {
+		this.showPassphrase = !this.showPassphrase;
+		this.requestUpdate();
+	}
 
-  togglePassphraseVisibility() {
-    this.showPassphrase = !this.showPassphrase;
-    this.requestUpdate();
-  }
-
-  copyToClipboard() {
-    if (!this.passphrase) return;
-    navigator.clipboard.writeText(this.passphrase);
-    this.showCopyIndicator = true;
-    this.requestUpdate();
-    setTimeout(() => {
-      this.showCopyIndicator = false;
-      this.requestUpdate();
-    }, 2000);
-  }
+	copyToClipboard() {
+		if (!this.passphrase) return;
+		navigator.clipboard.writeText(this.passphrase);
+		this.showCopyIndicator = true;
+		this.requestUpdate();
+		setTimeout(() => {
+			this.showCopyIndicator = false;
+			this.requestUpdate();
+		}, 2000);
+	}
 }
 
 customElements.define("passphrase-display", PassphraseDisplay);

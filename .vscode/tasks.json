@@ -11,7 +11,7 @@
 				"runOn": "folderOpen"
 			},
 			"label": "npm: watch",
-			"detail": "tsc --watch"
+			"detail": "tsc --watch --noEmit"
 		}
 	]
 }
