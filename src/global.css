@@ -1,20 +1,20 @@
 @property --strength {
-  syntax: "<number>";
-  inherits: true;
-  initial-value: 0;
+	syntax: "<number>";
+	inherits: true;
+	initial-value: 0;
 }
 
 :root {
-  color-scheme: dark;
+	color-scheme: dark;
 }
 
 body {
-  font-family: Arial, Helvetica, sans-serif;
-  text-underline-offset: 0.2em;
+	font-family: Arial, Helvetica, sans-serif;
+	text-underline-offset: 0.2em;
 }
 
 html,
 body {
-  margin: 0;
-  height: 100%;
+	margin: 0;
+	height: 100%;
 }

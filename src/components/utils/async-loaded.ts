@@ -1,4 +1,10 @@
-import { LitElement, html, css, PropertyDeclaration, TemplateResult } from "lit";
+import {
+	LitElement,
+	html,
+	css,
+	PropertyDeclaration,
+	TemplateResult,
+} from "lit";
 import "./loading-spinner.js";
 import { property } from "lit/decorators.js";
 
