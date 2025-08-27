@@ -4,6 +4,7 @@ import "./note.js";
 import "./utils/option-select.js";
 import "./utils/async-loaded.js";
 import { customElement, property } from "lit/decorators.js";
+import { loadList } from "../load-list.js";
 
 @customElement("passphrase-settings")
 export class PassphraseSettings extends LitElement {
@@ -108,15 +109,7 @@ export class PassphraseSettings extends LitElement {
 		}
 		this.#loading = true;
 		this.dispatchLoading();
-		const response = await fetch(
-			new URL(file, new URL("./word-lists/", location.href)),
-		);
-		const text = await response.text();
-		const words = text
-			.split(/\r?\n|\r/g)
-			.filter((v) => v)
-			.map((line) => line.replace(/^\d+\s+/, ""));
-		this.settings.words = words;
+		this.settings.words = await loadList(`./word-lists/${file}`);
 		this.settings.filename = file;
 		this.dispatchSettings();
 		this.#loading = false;

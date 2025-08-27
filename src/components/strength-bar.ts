@@ -8,10 +8,15 @@ import { customElement, property } from "lit/decorators.js";
 @customElement("strength-bar")
 export class StrengthBar extends LitElement {
 	static styles = css`
+		:host {
+			display: block;
+			width: 100%;
+			height: 0.5em;
+		}
 		.bar {
 			background-color: hsl(0, 0%, 23%);
 			border-radius: 0.3em;
-			height: 0.5em;
+			height: 100%;
 		}
 		.fill {
 			--percent: min(calc(var(--strength) * 1%), 100%);

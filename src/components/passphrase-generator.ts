@@ -53,16 +53,6 @@ export class PassphraseGenerator extends LitElement {
 	protected update(
 		changedProperties: PropertyValueMap<any> | Map<PropertyKey, unknown>,
 	): void {
-		const newSettings: GenerationOptions = changedProperties.get("settings");
-		if (
-			(!newSettings ||
-				(isPassphraseOptions(newSettings)
-					? newSettings.words.length !== 0
-					: newSettings.characters.length !== 0)) &&
-			!this.passphrase
-		) {
-			this.generate();
-		}
 		super.update(changedProperties);
 	}
 
@@ -103,7 +93,25 @@ export class PassphraseGenerator extends LitElement {
 		this.passphrase = isPassphraseOptions(this.settings)
 			? generatePassphrase(this.settings)
 			: generatePassword(this.settings);
-		this.optionsUsedForCurrentPassphrase = structuredClone(this.settings);
+		this.optionsUsedForCurrentPassphrase = deepFreeze(this.settings);
 		this.requestUpdate();
+		this.dispatchEvent(
+			new CustomEvent("generated", {
+				detail: {
+					passphrase: this.passphrase,
+					options: this.optionsUsedForCurrentPassphrase,
+				},
+			}),
+		);
 	}
+}
+
+function deepFreeze<T>(obj: T): T {
+	Object.getOwnPropertyNames(obj).forEach((name) => {
+		const prop = (obj as any)[name];
+		if (typeof prop === "object" && prop !== null && !Object.isFrozen(prop)) {
+			deepFreeze(prop);
+		}
+	});
+	return Object.freeze(obj);
 }

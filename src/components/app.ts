@@ -1,6 +1,5 @@
 import { html, css, LitElement } from "lit";
 import "./passphrase-generation-panel.js";
-import "./panel.js";
 import { customElement } from "lit/decorators.js";
 
 @customElement("app-root")
@@ -10,7 +9,6 @@ export class AppRoot extends LitElement {
 			display: grid;
 			gap: 1em;
 			justify-content: center;
-			align-content: center;
 			min-height: 100%;
 		}
 	`;
@@ -21,9 +19,7 @@ export class AppRoot extends LitElement {
 
 	render() {
 		return html`<div>
-			<content-panel>
-				<passphrase-generation-panel></passphrase-generation-panel>
-			</content-panel>
+			<passphrase-generation-panel></passphrase-generation-panel>
 		</div>`;
 	}
 }

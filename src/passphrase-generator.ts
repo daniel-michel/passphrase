@@ -33,7 +33,7 @@ function getCryptographicRandomNumberSequence(limit: number, count: number) {
 	return generateArray(count, () => getCryptographicRandomNumber(limit));
 }
 
-function getCryptographicRandomNumber(limit: number) {
+export function getCryptographicRandomNumber(limit: number) {
 	const requiredBits = Math.ceil(Math.log2(limit));
 	const requiredBytes = Math.ceil(requiredBits / 8);
 	const array = new Uint8Array(requiredBytes);

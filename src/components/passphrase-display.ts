@@ -1,9 +1,10 @@
 import { html, css, LitElement, unsafeCSS, PropertyValueMap } from "lit";
 import { createDataUrl } from "../utils/url.js";
 import { GenerationOptions, generateArray } from "../passphrase-generator.js";
-import "./utils/tooltip-toast.js";
+import "./utils/copy-toast.js";
 import "./strength-bar.js";
 import { customElement, property } from "lit/decorators.js";
+import { classMap } from "lit/directives/class-map.js";
 
 const copyIconSvg = `<svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 0 24 24" width="24px" fill="#FFFFFF"><path d="M0 0h24v24H0z" fill="none"/><path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z"/></svg>`;
 const copyIconUrl = createDataUrl(copyIconSvg, "image/svg+xml");
@@ -19,9 +20,102 @@ const asteriskIconUrl = createDataUrl(asteriskIconSvg, "image/svg+xml");
 
 @customElement("passphrase-display")
 export class PassphraseDisplay extends LitElement {
+	@property()
+	passphrase?: string;
+	@property({ attribute: false })
+	options?: GenerationOptions;
+	@property({ type: Boolean })
+	compact = false;
+
+	generatedPassphrase = false;
+	generatingPassphrase = false;
+	showPassphrase = false;
+	showCopyIndicator = false;
+
+	constructor() {
+		super();
+	}
+
+	render() {
+		return html`
+			<div
+				class=${classMap({
+					"show-passphrase": this.showPassphrase,
+					"passphrase-generated": this.generatedPassphrase,
+					generating: this.generatingPassphrase,
+					"show-asterisk": !this.showPassphrase,
+				})}
+			>
+				<div class="passphrase-container">
+					<span class="passphrase"> ${this.passphrase} </span>
+					<div class="asterisk">
+						${generateArray(
+							5,
+							(i) =>
+								html`<div class="asterisk-icon" style="--offset: ${i}"></div>`,
+						)}
+					</div>
+					<div class="buttons">
+						<button
+							class="toggle-passphrase-visibility"
+							@click=${this.togglePassphraseVisibility}
+						></button>
+						<copy-toast .show=${this.showCopyIndicator}>
+							<button class="copy" @click=${this.copyToClipboard}></button>
+							<div slot="indicator" class="copy-slot">Copied</div>
+						</copy-toast>
+					</div>
+					<strength-bar .options=${this.options}></strength-bar>
+				</div>
+			</div>
+		`;
+	}
+
+	#previousTimeout?: number;
+
+	protected update(
+		changedProperties: PropertyValueMap<any> | Map<PropertyKey, unknown>,
+	): void {
+		if (changedProperties.has("passphrase")) {
+			clearTimeout(this.#previousTimeout);
+			this.generatedPassphrase = false;
+			this.generatingPassphrase = false;
+			this.requestUpdate();
+			setTimeout(() => {
+				this.generatedPassphrase = true;
+				this.generatingPassphrase = true;
+				this.requestUpdate();
+				this.#previousTimeout = setTimeout(() => {
+					this.generatingPassphrase = false;
+					this.requestUpdate();
+				}, 1_500);
+			});
+		}
+		super.update(changedProperties);
+	}
+
+	togglePassphraseVisibility() {
+		this.showPassphrase = !this.showPassphrase;
+		this.requestUpdate();
+	}
+
+	copyToClipboard() {
+		if (!this.passphrase) return;
+		navigator.clipboard.writeText(this.passphrase);
+		this.showCopyIndicator = true;
+		this.requestUpdate();
+		setTimeout(() => {
+			this.showCopyIndicator = false;
+			this.requestUpdate();
+		}, 2000);
+	}
+
 	static styles = css`
 		:host > * {
 			margin: 0.5em 0;
+		}
+		:host([compact]) > * {
+			margin: 0;
 		}
 
 		button {
@@ -36,17 +130,22 @@ export class PassphraseDisplay extends LitElement {
 			gap: 0.8em;
 			grid-template-columns: 1fr auto;
 			position: relative;
-			background-color: hsl(0, 0%, 13%);
+			background-color: hsl(0, 0%, 12%);
 			padding: 0.8em;
 			min-height: 1.2em;
 			border-radius: 0.3em;
 			text-align: center;
 			justify-content: center;
 			align-items: center;
+
+			:host([compact]) & {
+				padding: 0.4em;
+				gap: 0.4em;
+			}
 		}
 		.passphrase-container::before {
 			content: "";
-			background-color: hsl(0, 0%, 31%);
+			background-color: hsl(0, 0%, 15%);
 			/* backdrop-filter: blur(5px); */
 			position: absolute;
 			width: 100%;
@@ -70,6 +169,7 @@ export class PassphraseDisplay extends LitElement {
 			padding: 0 0.8em;
 			grid-column: 1 / 1;
 			grid-row: 1 / 1;
+			user-select: none;
 		}
 		.passphrase-generated .passphrase {
 			opacity: 1;
@@ -105,7 +205,20 @@ export class PassphraseDisplay extends LitElement {
 			background-position: center;
 			background-repeat: no-repeat;
 			background-size: 100%;
-			animation: passphrase-generate 1s calc(var(--offset) * 80ms) linear;
+
+			.generating & {
+				animation: passphrase-generate 1s calc(var(--offset) * 80ms) linear;
+			}
+			.generating.show-asterisk & {
+				animation: passphrase-generate-hidden 1s calc(var(--offset) * 80ms)
+					ease-in-out;
+			}
+
+			.show-asterisk & {
+				opacity: 1;
+				scale: 0.6;
+				filter: grayscale(1) brightness(2);
+			}
 		}
 
 		@keyframes passphrase-generate {
@@ -117,7 +230,7 @@ export class PassphraseDisplay extends LitElement {
 			}
 			20% {
 				opacity: 1;
-				filter: blur(0.02em) hue-rotate(235eg);
+				filter: blur(0.02em) hue-rotate(235deg);
 				scale: 0.9;
 			}
 			40% {
@@ -149,6 +262,34 @@ export class PassphraseDisplay extends LitElement {
 				rotate: 120deg;
 			}
 		}
+		@keyframes passphrase-generate-hidden {
+			0% {
+				filter: grayscale(1) brightness(2) hue-rotate(290deg);
+				scale: 0.6;
+				rotate: -120deg;
+			}
+			20% {
+				filter: grayscale(0.5) brightness(1.5) hue-rotate(235deg);
+			}
+			48% {
+				scale: 1;
+			}
+			50% {
+				filter: grayscale(0) brightness(1) hue-rotate(180deg);
+				scale: 1;
+			}
+			52% {
+				scale: 1;
+			}
+			80% {
+				filter: grayscale(0.5) brightness(1.5) hue-rotate(90deg);
+			}
+			100% {
+				filter: grayscale(1) brightness(2) hue-rotate(0deg);
+				scale: 0.6;
+				rotate: 120deg;
+			}
+		}
 
 		.buttons {
 			display: grid;
@@ -157,17 +298,31 @@ export class PassphraseDisplay extends LitElement {
 			align-items: center;
 			width: fit-content;
 			z-index: 1;
+
+			:host([compact]) & {
+				gap: 0.4em;
+			}
+
+			* {
+				display: block;
+			}
 		}
-		.buttons > * {
+		.buttons button {
 			height: 2.5em;
 			width: 2.5em;
+			background-size: 50%;
+
+			:host([compact]) & {
+				height: 2.3em;
+				width: 2.3em;
+				background-size: 60%;
+			}
 		}
 
 		.toggle-passphrase-visibility {
 			background-image: url("${unsafeCSS(hiddenIconUrl)}");
 			background-position: center;
 			background-repeat: no-repeat;
-			background-size: 50%;
 		}
 		.show-passphrase .toggle-passphrase-visibility {
 			background-image: url("${unsafeCSS(visibleIconUrl)}");
@@ -180,7 +335,6 @@ export class PassphraseDisplay extends LitElement {
 			background-image: url("${unsafeCSS(copyIconUrl)}");
 			background-position: center;
 			background-repeat: no-repeat;
-			background-size: 50%;
 			min-height: 0;
 		}
 		.copy-slot {
@@ -190,87 +344,10 @@ export class PassphraseDisplay extends LitElement {
 		strength-bar {
 			grid-column: 1 / -1;
 			z-index: 1;
+
+			:host([compact]) & {
+				height: 0.3em;
+			}
 		}
 	`;
-
-	@property()
-	passphrase?: string;
-	@property({ attribute: false })
-	options?: GenerationOptions;
-
-	generatePassphrase = false;
-	showPassphrase = false;
-	showCopyIndicator = false;
-
-	constructor() {
-		super();
-	}
-
-	render() {
-		return html`
-			<div
-				class="${this.showPassphrase ? "show-passphrase" : ""} ${this
-					.generatePassphrase
-					? "passphrase-generated"
-					: ""}"
-			>
-				<div class="passphrase-container">
-					<span class="passphrase"> ${this.passphrase} </span>
-					<div class="asterisk">
-						${this.generatePassphrase
-							? generateArray(
-									5,
-									(i) =>
-										html`<div
-											class="asterisk-icon"
-											style="--offset: ${i}"
-										></div>`,
-								)
-							: ""}
-					</div>
-					<div class="buttons">
-						<button
-							class="toggle-passphrase-visibility"
-							@click=${this.togglePassphraseVisibility}
-						></button>
-						<tooltip-toast .show=${this.showCopyIndicator}>
-							<button class="copy" @click=${this.copyToClipboard}></button>
-							<div slot="indicator" class="copy-slot">Copied</div>
-						</tooltip-toast>
-					</div>
-					<strength-bar .options=${this.options}></strength-bar>
-				</div>
-			</div>
-		`;
-	}
-
-	protected update(
-		changedProperties: PropertyValueMap<any> | Map<PropertyKey, unknown>,
-	): void {
-		if (changedProperties.has("passphrase")) {
-			this.generatePassphrase = false;
-			this.requestUpdate();
-			setTimeout(() => {
-				this.generatePassphrase = true;
-				this.requestUpdate();
-			});
-		}
-		super.update(changedProperties);
-	}
-
-	togglePassphraseVisibility() {
-		this.showPassphrase = !this.showPassphrase;
-		this.requestUpdate();
-	}
-
-	copyToClipboard() {
-		if (!this.passphrase) return;
-		navigator.clipboard.writeText(this.passphrase);
-		this.showCopyIndicator = true;
-		this.requestUpdate();
-		setTimeout(() => {
-			this.showCopyIndicator = false;
-			this.requestUpdate();
-		}, 2000);
-	}
 }
