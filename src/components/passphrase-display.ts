@@ -165,6 +165,7 @@ export class PassphraseDisplay extends LitElement {
 		}
 
 		.passphrase {
+			word-break: break-word;
 			opacity: 0;
 			padding: 0 0.8em;
 			grid-column: 1 / 1;
