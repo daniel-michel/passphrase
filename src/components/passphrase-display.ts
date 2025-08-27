@@ -60,9 +60,8 @@ export class PassphraseDisplay extends LitElement {
 							class="toggle-passphrase-visibility"
 							@click=${this.togglePassphraseVisibility}
 						></button>
-						<copy-toast .show=${this.showCopyIndicator}>
-							<button class="copy" @click=${this.copyToClipboard}></button>
-							<div slot="indicator" class="copy-slot">Copied</div>
+						<copy-toast .text=${this.passphrase}>
+							<button class="copy"></button>
 						</copy-toast>
 					</div>
 					<strength-bar .options=${this.options}></strength-bar>
@@ -97,17 +96,6 @@ export class PassphraseDisplay extends LitElement {
 	togglePassphraseVisibility() {
 		this.showPassphrase = !this.showPassphrase;
 		this.requestUpdate();
-	}
-
-	copyToClipboard() {
-		if (!this.passphrase) return;
-		navigator.clipboard.writeText(this.passphrase);
-		this.showCopyIndicator = true;
-		this.requestUpdate();
-		setTimeout(() => {
-			this.showCopyIndicator = false;
-			this.requestUpdate();
-		}, 2000);
 	}
 
 	static styles = css`
